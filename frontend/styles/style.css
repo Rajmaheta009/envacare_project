@@ -1,0 +1,49 @@
+/* Left side: Login form */
+.form-container {
+    width: 45%;
+    background: #161b22;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+    color: white;
+}
+
+.form-container h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.form-container label {
+    font-size: 14px;
+}
+
+/* Button Styling */
+div.stButton > button {
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    border: none;
+    transition: 0.3s;
+    width: 100%;
+}
+
+div.stButton > button:hover {
+    background-color: #45a049;
+    cursor: pointer;
+}
+
+.image_css{
+    width: 23%;
+    left: 19%;
+    top: 11%;
+    position: fixed;
+}
+
+.st-emotion-cache-mtjnbi {
+    width: 100%;
+    padding: 6rem 1rem 10rem;
+    max-width: 736px;
+    position: fixed;
+}
