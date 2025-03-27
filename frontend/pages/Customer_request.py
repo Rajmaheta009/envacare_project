@@ -1,171 +1,169 @@
 import streamlit as st
 import pandas as pd
+import requests
 
-# Initialize session state
+# API URLs
+API_BASE_URL = "http://127.0.0.1:8000"
+CUSTOMER_API = f"{API_BASE_URL}/customer_request/"
+ORDER_API = f"{API_BASE_URL}/order/customer_id/"
+QUOTATION_API = f"{API_BASE_URL}/quotations/"
+
+# Initialize session state variables
 if "login" not in st.session_state:
     st.session_state.login = False
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
-if "form_data" not in st.session_state:
-    st.session_state.form_data = []
-if "quotation_data" not in st.session_state:
-    st.session_state.quotation_data = []
-if "current_customer" not in st.session_state:
-    st.session_state.current_customer = None
 if "show_quotation_form" not in st.session_state:
     st.session_state.show_quotation_form = False
+if "customer_id" not in st.session_state:
+    st.session_state.customer_id = None
+if "order_id" not in st.session_state:
+    st.session_state.order_id = None  # ✅ Store the latest order ID
+if "current_customer" not in st.session_state:
+    st.session_state.current_customer = None
+if "current_customer_email" not in st.session_state:
+    st.session_state.current_customer_email = None
+if "c_comment" not in st.session_state:
+    st.session_state.c_comment = None
+if "c_doc" not in st.session_state:
+    st.session_state.c_doc = None
 
-# Sample Parameters and Sub-parameters with Costs
+# Sample Parameters with Costs
 parameters = {
     "Header 1": {"Sub1": 100, "Sub2": 200, "Sub3": 150},
     "Header 2": {"Sub4": 300, "Sub5": 250},
     "Header 3": {"Sub6": 400, "Sub7": 350}
 }
 
-# Check login status
-if st.session_state.login:
+# Helper function to fetch customers
+def fetch_customers():
+    """Fetch customers from the API"""
+    try:
+        response = requests.get(CUSTOMER_API)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            st.error("❌ Failed to fetch customer data.")
+            return []
+    except Exception as e:
+        st.error(f"⚠️ Error: {e}")
+        return []
 
-    # Page layout
+# Fetch the latest order by customer ID
+def fetch_latest_order(customer_id):
+    """Fetch the latest order for the customer"""
+    try:
+        response = requests.get(f"{ORDER_API}{customer_id}")
+        if response.status_code == 200:
+            order = response.json()
+            return order
+        else:
+            return None
+    except Exception as e:
+        st.error(f"⚠️ Error: {e}")
+        return None
+
+# Function to submit quotation
+def submit_quotation(data):
+    """Submit quotation linked to order_id"""
+    try:
+        response = requests.post(QUOTATION_API, json=data)
+        if response.status_code == 201:
+            st.success("✅ Quotation added successfully!")
+            st.session_state.show_quotation_form = False
+            st.rerun()
+        else:
+            st.error(f"❌ Failed to submit quotation: {response.status_code}")
+            st.error(response.text)
+    except Exception as e:
+        st.error(f"⚠️ Error: {e}")
+
+# Main app logic
+if st.session_state.login:
     st.title("📝 Customer Requests")
 
-    # Button to display the form
+    # Fetch and display customers
+    customers = fetch_customers()
+
     if st.button("➕ Add Request"):
         st.session_state.show_form = True
 
-    # Display the form
-    if st.session_state.show_form:
-        with st.form("customer_form"):
-            st.markdown("### ➕ Add New Request")
+    # Display customer requests with "Add Quotation" buttons
+    st.markdown("### 📊 Submitted Customer Requests")
 
-            col1, col2 = st.columns(2)
-            name = col1.text_input("Customer Name", placeholder="Enter customer name", max_chars=50)
-            address = col2.text_area("Address", placeholder="Enter customer address")
+    if customers:
+        df = pd.DataFrame(customers)
 
-            col3, col4 = st.columns(2)
-            email = col3.text_input("Email ID", placeholder="Enter customer email")
-            contact = col4.text_input("Contact Number", placeholder="Enter contact number")
-
-            col5, col6 = st.columns(2)
-            whatsapp = col5.text_input("WhatsApp Number", placeholder="Enter WhatsApp number")
-            comment = col6.text_area("Comment (Optional)", placeholder="Add any comments")
-
-            # Submit and Cancel buttons
-            col_submit, col_cancel = st.columns([1, 1])
-            submit_btn = col_submit.form_submit_button("✅ Submit")
-            cancel_btn = col_cancel.form_submit_button("❌ Cancel")
-
-        # Form submission logic
-        if submit_btn:
-            if name and email and contact:
-                st.session_state.form_data.append({
-                    "Name": name,
-                    "Address": address,
-                    "Email": email,
-                    "Contact": contact,
-                    "WhatsApp": whatsapp,
-                    "Comment": comment if comment else "N/A"
-                })
-                st.success("✅ Request added successfully!")
-                st.session_state.show_form = False
-                st.rerun()
-            else:
-                st.error("❌ Please fill in all required fields.")
-
-        if cancel_btn:
-            st.session_state.show_form = False
-            st.rerun()
-
-    # Display submitted requests with "Add Quotation" buttons
-    st.markdown("### 📊 Submitted Requests")
-
-    if st.session_state.form_data:
-        # Convert the form data into a DataFrame
-        df = pd.DataFrame(st.session_state.form_data)
-
-        # Add "Add Quotation" column with buttons
         for index, row in df.iterrows():
-            cols = st.columns(len(df.columns) + 1)  # Extra column for the button
+            customer_id = row.get("id")
 
-            # Display row data
-            for i, value in enumerate(row):
+            # Display customer data without 'id'
+            row_display = row.drop("id")
+            cols = st.columns(len(row_display) + 1)
+
+            for i, value in enumerate(row_display):
                 cols[i].write(value)
 
-            # Add "Add Quotation" button
+            # Add Quotation button
             if cols[-1].button("➕ Add Quotation", key=f"quote_{index}"):
-                st.session_state.current_customer = row['Name']
-                st.session_state.current_customer_email = row['Email']
-                st.session_state.current_customer_comment = row['Comment']
-                st.session_state.show_quotation_form = True
+                if customer_id:
+                    st.session_state.customer_id = customer_id
+                    st.session_state.current_customer = row['name']
+                    st.session_state.current_customer_email = row['email']
 
-        # Display the quotation form dynamically
-        if st.session_state.show_quotation_form:
-            st.title("📝 Create Quotation")
+                    # ✅ Fetch the latest order and store the `order_id`
+                    latest_order = fetch_latest_order(customer_id)
 
-            col_left, col_middle, col_right = st.columns([2, 3, 2])
-
-            with st.form("quotation_form_data"):
-                # Left Column → Customer Details
-                with col_left:
-                    st.markdown("### 📄 Customer Details")
-                    st.write(f"**Name:** {st.session_state.current_customer}")
-                    st.write(f"**Email:** {st.session_state.current_customer_email}")
-                    st.write(f"**Comment:** {st.session_state.current_customer_comment}")
-
-                # Middle Column → Parameters with Sub-parameters
-                with col_middle:
-                    st.markdown("### 🛠️ Parameters & Sub-parameters")
-                    selected_params = {}
-
-                    for header, sub_params in parameters.items():
-                        st.subheader(header)
-                        for sub_param, cost in sub_params.items():
-                            key = f"{header}_{sub_param}"
-                            if st.checkbox(f"{sub_param} (₹{cost})", key=key):
-                                selected_params[sub_param] = cost
-
-                # Right Column → Selected Parameters and Total Cost
-                with col_right:
-                    st.markdown("### 💰 Selected Parameters & Cost Summary")
-
-                    if selected_params:
-                        total_cost = sum(selected_params.values())
-                        param_count = len(selected_params)
-
-                        for param, cost in selected_params.items():
-                            st.write(f"✅ {param}: ₹{cost}")
-
-                        st.write("---")
-                        st.write(f"**Total Parameters:** 🔢 {param_count}")
-                        st.write(f"**Total Cost:** 💵 ₹{total_cost}")
+                    if latest_order:
+                        st.session_state.order_id = latest_order.get("id")  # Store `order_id`
+                        st.session_state.c_comment = latest_order.get("order_req_comment", "No comment available")
+                        st.session_state.c_doc = latest_order.get("order_req_doc", "No document uploaded")
                     else:
-                        st.write("No parameters selected")
+                        st.session_state.order_id = None
+                        st.session_state.c_comment = "No comment available"
+                        st.session_state.c_doc = "No document uploaded"
 
-                # Submit and Cancel buttons
-                col_submit, col_cancel = st.columns(2)
-                submit_btn = col_submit.form_submit_button("✅ Submit Quotation")
-                cancel_btn = col_cancel.form_submit_button("❌ Cancel")
+                    st.session_state.show_quotation_form = True
 
-                # Store the quotation data
-                if submit_btn:
-                    quotation = {
-                        "Name": st.session_state.current_customer,
-                        "Email": st.session_state.current_customer_email,
-                        "Parameter List": ", ".join(selected_params.keys()),
-                        "Total Cost": total_cost
+    # Display quotation form dynamically
+    if st.session_state.show_quotation_form:
+        st.title("📝 Create Quotation")
+
+        col_left, col_middle, col_right = st.columns([2, 3, 2])
+
+        with st.form("quotation_form"):
+            # Left → Customer details
+            with col_left:
+                st.markdown("### 📄 Customer Details")
+                st.write(f"**Name:** {st.session_state.current_customer}")
+                st.write(f"**Email:** {st.session_state.current_customer_email}")
+                st.write(f"**Comments:** {st.session_state.c_comment}")
+                st.write(f"**Doc:** {st.session_state.c_doc}")
+
+            # Middle → Parameter selection
+            with col_middle:
+                st.markdown("### 🛠️ Parameters")
+                selected_params = {}
+                for header, sub_params in parameters.items():
+                    st.subheader(header)
+                    for sub_param, cost in sub_params.items():
+                        if st.checkbox(f"{sub_param} (₹{cost})"):
+                            selected_params[sub_param] = cost
+
+            # Right → Cost summary
+            with col_right:
+                total_cost = sum(selected_params.values())
+                st.write(f"**Total Cost:** 💵 ₹{total_cost}")
+
+            # ✅ Use `order_id` instead of `customer_id` in quotation submission
+            if st.form_submit_button("✅ Submit Quotation"):
+                if st.session_state.order_id:
+                    quotation_data = {
+                        "order_id": st.session_state.order_id,  # ✅ Use `order_id`
+                        "pdf_url": "that time is pandding"
                     }
-                    st.session_state.quotation_data.append(quotation)
-
-                    st.success(f"✅ Quotation added for {st.session_state.current_customer}")
-                    st.session_state.show_quotation_form = False
-                    st.rerun()
-
-                if cancel_btn:
-                    st.session_state.show_quotation_form = False
-                    st.rerun()
-
-    else:
-        st.warning("⚠️ No data found")
-
+                    submit_quotation(quotation_data)
+                else:
+                    st.error("❌ No valid order ID found!")
 else:
-    st.text("⚠️ Please login first.")
-    st.switch_page('app.py')
+    st.switch_page("app.py")
