@@ -1,5 +1,8 @@
+import requests
 import streamlit as st
 import pandas as pd
+
+API_BASE_URL = "http://localhost:8000"
 
 # Initialize session state variables
 if "login" not in st.session_state:
@@ -13,12 +16,24 @@ if st.session_state.login:
     # Display Submitted Quotations
     st.markdown("### 📄 Submitted Quotations")
 
-    if st.session_state.quotation_data:
-        # Display table
-        df = pd.DataFrame(st.session_state.quotation_data)
-        st.dataframe(df, use_container_width=True)
-    else:
-        st.warning("⚠️ No data found")
+    try:
+        response = requests.get(f"{API_BASE_URL}/quotations/")
+        if response.status_code == 200:
+            data = response.json()
+
+            if data:
+                df = pd.DataFrame(data)
+                df = df.drop("id", axis=1)
+                df = df.drop("order_id", axis=1)
+                st.dataframe(df, use_container_width=True)
+            else:
+                st.warning("⚠️ No customer requests found")
+        else:
+            st.error("❌ Failed to fetch customer requests")
+
+    except Exception as e:
+        st.error(f"⚠️ Error: {e}")
+
 
 else:
     st.text("⚠️ Please login first.")

@@ -70,7 +70,7 @@ async def create_order(
 @router.get("/")
 def get_orders(db: Session = Depends(get_db)):
     """ Retrieve all non-deleted orders with filenames """
-    orders = db.query(Order).filter(Order.is_deleted == False).all()
+    orders = db.query(Order).all()
 
     result = []
     for order in orders:
