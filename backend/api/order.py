@@ -1,10 +1,11 @@
+import shutil
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from database import get_db
 from modal.order import Order, get_next_id
-from schema.order import OrderCreate, OrderUpdate, OrderOut
+from schema.order import OrderCreate, OrderUpdate
 import os
 
 router = APIRouter()
@@ -17,7 +18,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 # ✅ Helper function to add file URL to order
 def append_filename(order):
     """ Add file URL to order output """
-    file_url = f"http://127.0.0.1:8000/static/{order.order_req_doc}" if order.order_req_doc != "No document uploaded" else "No document uploaded"
+    file_url = f"http://127.0.0.1:8000/{UPLOAD_DIR}/{order.order_req_doc}" if order.order_req_doc != "No document uploaded" else "No document uploaded"
 
     return {
         "id": order.id,
@@ -34,23 +35,29 @@ async def create_order(
         customer_id: int = Form(...),
         order_req_comment: str = Form(...),
         status: str = Form(...),
-        docfile: Optional[UploadFile] = File(None),
+        docfile: Optional[UploadFile] = File(),
         db: Session = Depends(get_db)
 ):
-    """ Create a new order with optional file upload """
-    image_path = "No document uploaded"
-
+    # raise HTTPException(status_code=404,detail=f"{docfile.filename}")
     # Handle file upload
-    if docfile:
+    # document=docfile.filename
+    if docfile != "":
         next_id = get_next_id(db)
-        file_extension = os.path.splitext(docfile.filename)[1]  # Keeps original extension
-        new_filename = f"{next_id}{file_extension}"
-        image_path = os.path.join(new_filename)
+        filename = docfile.filename
+        file_extension = '.' + filename.split('.')[-1] if '.' in filename else ''
 
-        # Save file
+        new_filename = f"{next_id+1}{file_extension}"
+
+        image_path = os.path.join(UPLOAD_DIR, new_filename)
+
+        # ✔️ Save the file
         with open(image_path, "wb") as f:
-            f.write(docfile.file.read())
+            shutil.copyfileobj(docfile.file, f)
 
+    # raise HTTPException(status_code=400,detail=f"{file_extension}")
+    # return f"{file_extension}"
+    else:
+        new_filename="that is not work"
     # Create new order record
     new_order = Order(
         customer_id=customer_id,
@@ -72,9 +79,7 @@ def get_orders(db: Session = Depends(get_db)):
     """ Retrieve all non-deleted orders with filenames """
     orders = db.query(Order).all()
 
-    result = []
-    for order in orders:
-        result.append(append_filename(order))
+    result = [append_filename(order) for order in orders]
 
     return result
 
@@ -97,7 +102,7 @@ def get_order_by_customer_id(customer_id: int, db: Session = Depends(get_db)):
     """ Retrieve the latest order by customer ID """
     latest_order = (
         db.query(Order)
-        .filter(Order.customer_id == customer_id)
+        .filter(Order.customer_id == customer_id, Order.is_deleted == False)
         .order_by(desc(Order.created_at))
         .first()
     )

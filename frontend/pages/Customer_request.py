@@ -1,6 +1,7 @@
 import streamlit as st
-import pandas as pd
 import requests
+from requests import session
+from streamlit import session_state
 
 # API URLs
 API_BASE_URL = "http://localhost:8000"
@@ -9,8 +10,8 @@ ORDER_API = f"{API_BASE_URL}/order/"
 QUOTATION_API = f"{API_BASE_URL}/quotations/"
 
 # Initialize session state variables
-if "login" not in st.session_state:
-    st.session_state.login = False
+# if "login" not in st.session_state:
+#     st.session_state.login = False
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
 if "selected_customer_id" not in st.session_state:
@@ -52,22 +53,23 @@ def fetch_customers_with_orders():
 # ✅ Function to submit customer request
 def submit_customer_request(data, comment, docfile):
     """Create customer request and corresponding order"""
-    customer_response = requests.post(CUSTOMER_API, json=data)
-
-    if customer_response.status_code == 200:
-        customer = customer_response.json()
-        customer_id = customer.get("id") or customer.get("customer_id")
-
-        if customer_id:
+    # customer_response = requests.post(CUSTOMER_API, json=data)
+    #
+    # if customer_response.status_code == 200:
+    #     customer = customer_response.json()
+    #     customer_id = customer.get("id") or customer.get("customer_id")
+    #
+    if True:
             # Create order linked to the customer
-            order_data = {
-                "customer_id": customer_id,
+            # Prepare file upload
+            files = {'docfile': docfile} if docfile else None
+            data = {
+                "customer_id": 1,
                 "order_req_comment": comment,
-                "order_req_doc": docfile if docfile else "No document uploaded",
                 "status": "Quotation Check"
             }
-
-            order_response = requests.post(ORDER_API, json=order_data)
+            # Send order request with file upload
+            order_response = requests.post(ORDER_API, data=data, files=files)
 
             if order_response.status_code == 201:
                 st.success("✅ Customer and Order created successfully!")
@@ -75,10 +77,12 @@ def submit_customer_request(data, comment, docfile):
                 st.rerun()
             else:
                 st.error(f"❌ Failed to create order. Status: {order_response.status_code}")
-        else:
-            st.error("❌ Customer ID not found in response!")
-    else:
-        st.error(f"❌ Failed to submit customer request. Status: {customer_response.status_code}")
+                st.write(data)
+                st.write(files)
+    #     else:
+    #         st.error("❌ Customer ID not found in response!")
+    # else:
+    #     st.error(f"❌ Failed to submit customer request. Status: {customer_response.status_code}")
 
 
 # ✅ Function to submit quotation
@@ -102,7 +106,7 @@ def submit_quotation(order_id, selected_params, total_cost):
 
 
 # ✅ Main App Logic
-if st.session_state.login:
+if session_state.login:
     st.title("📝 Customer Requests")
 
     # 🚀 Customer Request Form at the Top
@@ -140,7 +144,7 @@ if st.session_state.login:
                         "address": address,
                         "is_delete": False
                     }
-                    docfile = document.name if document else "No document uploaded"
+                    docfile = document.name
 
                     submit_customer_request(new_customer, comment, docfile)
                 else:
@@ -212,3 +216,4 @@ if st.session_state.login:
 
 else:
     st.warning("🚫 Please log in to access this page.")
+    st.switch_page("../auth_pages/login.py")

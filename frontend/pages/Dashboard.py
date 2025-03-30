@@ -1,7 +1,9 @@
 import requests
 import streamlit as st
 import pandas as pd
+from component.nav import log_out_nav
 
+# st.session_state.login = local_st
 # ✅ Initialize session state variables to prevent AttributeError
 if "login" not in st.session_state:
     st.session_state.login = False
@@ -24,11 +26,7 @@ if st.session_state.login:
 
     # Logout button
     if col2.button("🚪 Logout"):
-        with st.spinner("Logging out..."):
-            # Clear session state
-            st.session_state.login = False
-            st.success("✅ Successfully logged out!")
-            st.rerun()
+        st.navigation(log_out_nav)
 
     # ✅ Customer Request Section
     st.subheader("📥 Customer Requests")
@@ -81,4 +79,4 @@ if st.session_state.login:
 
 else:
     st.text("⚠️ Please login first")
-    st.switch_page("app.py")
+    st.switch_page("main.py")
