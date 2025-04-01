@@ -1,12 +1,12 @@
 import requests
 import streamlit as st
 import pandas as pd
-from component.nav import log_out_nav
+from component.local_store import LocalStorageManager
 
-# st.session_state.login = local_st
+
+storage=LocalStorageManager("user_login_status")
+
 # ✅ Initialize session state variables to prevent AttributeError
-if "login" not in st.session_state:
-    st.session_state.login = False
 if "form_data" not in st.session_state:
     st.session_state.form_data = []
 if "quotation_data" not in st.session_state:
@@ -26,7 +26,8 @@ if st.session_state.login:
 
     # Logout button
     if col2.button("🚪 Logout"):
-        st.navigation(log_out_nav)
+        st.navigation([st.Page("pages/log_out.py")])
+        st.rerun()
 
     # ✅ Customer Request Section
     st.subheader("📥 Customer Requests")
@@ -40,7 +41,7 @@ if st.session_state.login:
                 df = pd.DataFrame(data)
                 df = df.drop("id", axis=1)
                 df = df.drop("is_delete", axis=1)
-                st.dataframe(df, use_container_width=True)
+                st.dataframe(df.set_index(df.columns[0]))
             else:
                 st.warning("⚠️ No customer requests found")
         else:
@@ -58,9 +59,7 @@ if st.session_state.login:
 
             if data:
                 df = pd.DataFrame(data)
-                df = df.drop("id", axis=1)
-                df = df.drop("order_id", axis=1)
-                st.dataframe(df, use_container_width=True)
+                st.dataframe(df.set_index(df.columns[0]))
             else:
                 st.warning("⚠️ No customer requests found")
         else:

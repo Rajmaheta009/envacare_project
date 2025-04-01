@@ -11,7 +11,7 @@ import os
 router = APIRouter()
 
 # Directory to store uploaded documents
-UPLOAD_DIR = "static/upload"
+UPLOAD_DIR = "static"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
@@ -148,16 +148,35 @@ def restore_order(order_id: int, db: Session = Depends(get_db)):
 
 
 # ✅ Update an order
-@router.put("/{order_id}", response_model=dict)
-def update_order(order_id: int, order_data: OrderUpdate, db: Session = Depends(get_db)):
+@router.put("/{order_id}", status_code=200)
+def update_order(
+        order_id :int,
+        customer_id: int = Form(...),
+        order_req_comment: str = Form(...),
+        status: str = Form(...),
+        docfile: Optional[UploadFile] = File(),
+        db: Session = Depends(get_db)):
     """ Update an existing order """
     order = db.query(Order).filter(Order.id == order_id).first()
 
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    for key, value in order_data.dict(exclude_unset=True).items():
-        setattr(order, key, value)
+    if customer_id:
+        order.customer_id = customer_id
+    if order_req_comment:
+        order.order_req_comment=order_req_comment
+    if status:
+        order.status = status
+    if docfile:
+        file_extension = os.path.splitext(docfile.filename)[1]
+        new_filename = f"{order_id}{file_extension}"
+        docfile_path = os.path.join(UPLOAD_DIR, new_filename)
+
+        with open(docfile_path, "wb") as f:
+            f.write(docfile.file.read())
+
+        order.order_req_doc = new_filename
 
     db.commit()
     db.refresh(order)

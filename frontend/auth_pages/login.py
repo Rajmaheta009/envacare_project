@@ -1,9 +1,9 @@
 import requests
 import streamlit as st
-from component.local_store import set_local_store_value
+from component.local_store import LocalStorageManager
 from component.nav import login_nav
 
-st.session_state.login = False
+storage=LocalStorageManager("user_login_status")
 
 # --- Backend API URL ---
 BASE_URL = "http://127.0.0.1:8000/auth"
@@ -31,13 +31,14 @@ if login_btn:
         # ✅ Store user info in session state
         st.session_state.username = data.get("username", "")
         st.session_state.user_id = data.get("id", "")
-        st.session_state.login = True
-
+        storage.set_item("login_status",True)
         st.success("✅ Login successful! Redirecting...")
-        set_local_store_value()
         main=st.Page("main.py",title="main")
-        pg = st.navigation([main], position="hidden")
+        pg = st.navigation([main],position="hidden")
         pg.run()
+        st.rerun()
     else:
         st.error("❌ Invalid credentials. Try again.")
+
+
 

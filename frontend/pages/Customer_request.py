@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-from requests import session
 from streamlit import session_state
 
 # API URLs
@@ -10,12 +9,12 @@ ORDER_API = f"{API_BASE_URL}/order/"
 QUOTATION_API = f"{API_BASE_URL}/quotations/"
 
 # Initialize session state variables
-# if "login" not in st.session_state:
-#     st.session_state.login = False
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
 if "selected_customer_id" not in st.session_state:
     st.session_state.selected_customer_id = None
+if "customer_to_edit" not in st.session_state:
+    st.session_state.customer_to_edit = None
 
 # Sample Parameters with Costs
 parameters = {
@@ -23,7 +22,6 @@ parameters = {
     "Header 2": {"Sub4": 300, "Sub5": 250},
     "Header 3": {"Sub6": 400, "Sub7": 350}
 }
-
 
 # ✅ Function to fetch customers with orders
 def fetch_customers_with_orders():
@@ -50,57 +48,85 @@ def fetch_customers_with_orders():
         return []
 
 
-# ✅ Function to submit customer request
-def submit_customer_request(data, comment, docfile):
-    """Create customer request and corresponding order"""
-    # customer_response = requests.post(CUSTOMER_API, json=data)
-    #
-    # if customer_response.status_code == 200:
-    #     customer = customer_response.json()
-    #     customer_id = customer.get("id") or customer.get("customer_id")
-    #
-    if True:
-            # Create order linked to the customer
-            # Prepare file upload
-            files = {'docfile': docfile} if docfile else None
-            data = {
-                "customer_id": 1,
+# ✅ Function to fetch customer details by ID for editing
+def fetch_customer_by_id(customer_id):
+    """Fetch customer details for a specific customer ID"""
+    try:
+        customer = requests.get(f"{CUSTOMER_API}{customer_id}/").json()
+        return customer
+    except Exception as e:
+        st.error(f"⚠️ Error fetching customer details: {e}")
+        return None
+
+
+# ✅ Function to fetch order details by customer ID
+def fetch_order_by_customer_id(customer_id):
+    """Fetch order details for a specific customer ID"""
+    try:
+        order = requests.get(f"{ORDER_API}?customer_id={customer_id}").json()
+        return order[0]
+    except Exception as e:
+        st.error(f"⚠️ Error fetching order details: {e}")
+        return None
+
+
+# ✅ Function to create a new customer and order
+def create_customer_and_order(data, comment, docfile):
+    """Create a new customer and order"""
+    try:
+        # Create new customer
+        response = requests.post(CUSTOMER_API, json=data)
+        if response.status_code == 200:
+            customer = response.json()
+            customer_id = customer.get("id")
+
+            # Create a new order for the customer
+            order_data = {
+                "customer_id": customer_id,
                 "order_req_comment": comment,
                 "status": "Quotation Check"
             }
-            # Send order request with file upload
-            order_response = requests.post(ORDER_API, data=data, files=files)
+            files = {'docfile': docfile} if docfile else None
+            order_response = requests.post(ORDER_API, data=order_data, files=files)
 
-            if order_response.status_code == 201:
+            if order_response.status_code == 200:
                 st.success("✅ Customer and Order created successfully!")
                 st.session_state.show_form = False
                 st.rerun()
             else:
                 st.error(f"❌ Failed to create order. Status: {order_response.status_code}")
-                st.write(data)
+                st.write(order_data)
                 st.write(files)
-    #     else:
-    #         st.error("❌ Customer ID not found in response!")
-    # else:
-    #     st.error(f"❌ Failed to submit customer request. Status: {customer_response.status_code}")
+
+    except Exception as e:
+        st.error(f"⚠️ Error: {e}")
 
 
-# ✅ Function to submit quotation
-def submit_quotation(order_id, selected_params, total_cost):
-    """Submit quotation linked to customer_id"""
-    quotation_data = {
-        "order_id": order_id,
-        "pdf_url":"that is pandding"
-    }
-
+# ✅ Function to update an existing customer and order
+def update_customer_and_order(customer_id, order_id, data, comment, docfile):
+    """Update an existing customer and order"""
     try:
-        response = requests.post(QUOTATION_API, json=quotation_data)
+        # Update customer
+        response = requests.put(f'{CUSTOMER_API}{customer_id}', json=data)
         if response.status_code == 200:
-            st.success("✅ Quotation added successfully!")
-            st.session_state.selected_customer_id = None  # Reset selection
-            st.rerun()
-        else:
-            st.error(f"❌ Failed to submit quotation: {response.status_code}")
+            # Update order for the customer
+            order_data = {
+                "customer_id": customer_id,
+                "order_req_comment": comment,
+                "status": "Quotation Check"
+            }
+            files = {'docfile': docfile}
+            order_response = requests.put(f"{ORDER_API}{order_id}", data=order_data, files=files)
+
+            if order_response.status_code == 200:
+                st.success("✅ Customer and Order updated successfully!")
+                st.session_state.show_form = False
+                st.rerun()
+            else:
+                st.error(f"❌ Failed to update order. Status: {order_response.status_code}")
+                st.write(order_data)
+                st.write(files)
+
     except Exception as e:
         st.error(f"⚠️ Error: {e}")
 
@@ -134,21 +160,19 @@ if session_state.login:
             submit_btn = st.form_submit_button("✅ Submit")
             cancel_btn = st.form_submit_button("❌ Cancel")
 
-            if submit_btn:
-                if name and email and phone and (comment or document):
-                    new_customer = {
-                        "name": name,
-                        "email": email,
-                        "phone_number": phone,
-                        "whatsapp_number": whatsapp,
-                        "address": address,
-                        "is_delete": False
-                    }
-                    docfile = document.name
-
-                    submit_customer_request(new_customer, comment, docfile)
-                else:
-                    st.error("❌ Please fill all required fields and add a comment or document.")
+        if submit_btn:
+            if name and email and phone and (comment or document):
+                new_customer = {
+                    "name": name,
+                    "email": email,
+                    "phone_number": phone,
+                    "whatsapp_number": whatsapp,
+                    "address": address,
+                    "is_delete": False
+                }
+                create_customer_and_order(new_customer, comment, document)
+            else:
+                st.error("❌ Please fill all required fields and add a comment or document.")
 
             if cancel_btn:
                 st.session_state.show_form = False
@@ -162,7 +186,6 @@ if session_state.login:
     if customers:
         for customer in customers:
             customer_id = customer.get("id")
-
             # Expandable section for each customer
             with st.expander(f"{customer['name']} - {customer['email']}"):
                 st.write(f"**Address:** {customer['address']}")
@@ -171,49 +194,73 @@ if session_state.login:
                 st.write(f"**Comment:** {customer['order_req_comment']}")
                 st.write(f"**Document:** {customer['order_req_doc']}")
 
+                # Edit button for each customer
+                if st.button(f"Edit {customer['name']}", key=f"edit_{customer_id}"):
+                    # Fetch customer details based on customer_id
+                    customer_details = fetch_customer_by_id(customer_id)
+                    if customer_details:
+                        # Store the selected customer details in session state for editing
+                        st.session_state.show_form = True
+                        st.session_state.customer_to_edit = customer_details  # Store customer data in session state
+
                 # Quotation button
                 if st.button(f"➕ Add Quotation for {customer['name']}", key=f"quote_{customer_id}"):
                     st.session_state.selected_customer_id = customer_id
 
-                # ✅ Display quotation form immediately below the customer
-                if st.session_state.selected_customer_id == customer_id:
-                    st.markdown("### ✏️ Create Quotation")
+                # Show the Edit Form below customer details
+                if st.session_state.show_form and "customer_to_edit" in st.session_state and st.session_state.customer_to_edit["id"] == customer_id:
+                    # When the edit form is shown for the selected customer, pre-fill the form
+                    customer_to_edit = st.session_state.customer_to_edit
 
-                    # Compact layout: customer + parameters in the same section
-                    with st.container():
-                        col1, col2 ,col3 = st.columns([3, 4,3])
+                    order = fetch_order_by_customer_id(customer_id)
+                    order_comment = order.get("order_req_comment", "")
+                    order_doc = order.get("order_req_doc", "")
 
-                        # Customer details on the left
-                        with col1:
-                            st.markdown("#### 🛠️ Customer Details")
-                            st.write(f"**Name:** {customer['name']}")
-                            st.write(f"**Email:** {customer['email']}")
-                            st.write(f"**Comments:** {customer['order_req_comment']}")
-                            st.write(f"**Doc:** {customer['order_req_doc']}")
+                    with st.form(f"customer_form_{customer_id}"):
+                        st.markdown("### 🛠️ Edit Customer Request")
 
-                        # Parameters + Cost on the right
-                        with col2:
-                            st.markdown("#### 🔥 Select Parameters")
+                        col1, col2 = st.columns(2)
+                        name = col1.text_input("Customer Name", placeholder="Enter customer name", max_chars=50, value=customer_to_edit["name"])
+                        email = col2.text_input("Email ID", placeholder="Enter customer email", value=customer_to_edit["email"])
 
-                            selected_params = {}
-                            for header, items in parameters.items():
-                                st.markdown(f"**{header}**")
-                                for param, cost in items.items():
-                                    if st.checkbox(f"{param} - ₹{cost}", key=f"{customer_id}_{param}"):
-                                        selected_params[param] = cost
-                        with col3:
-                            st.subheader("Total Cost and Parameter Count")  # Heading
-                            # Total cost and parameter count
-                            total_cost = sum(selected_params.values())
-                            param_count = len(selected_params)
+                        col3, col4 = st.columns(2)
+                        phone = col3.text_input("Phone Number", placeholder="Enter phone number", value=customer_to_edit["phone_number"])
+                        whatsapp = col4.text_input("WhatsApp Number", placeholder="Enter WhatsApp number", value=customer_to_edit["whatsapp_number"])
 
-                            st.write(f"**Total Parameters:** {param_count}")
-                            st.write(f"**Total Cost:** 💵 ₹{total_cost}")
+                        address = st.text_area("Address", placeholder="Enter customer address", value=customer_to_edit["address"])
 
-                    # Submit button
-                    if st.button("✅ Submit Quotation", key=f"submit_quote_{customer_id}"):
-                        submit_quotation(customer_id, selected_params, total_cost)
+                        col5, col6 = st.columns(2)
+                        comment = col5.text_area("Comment", placeholder="Add comments", value=order_comment)
+                        document = col6.file_uploader("Upload Document", type=["pdf", "docx", "txt", "xlsx", "csv"], key=f"edit_document_{customer_id}")
+
+                        if order_doc:
+                            st.write(f"Existing document: {order_doc}")
+
+                        submit_btn = st.form_submit_button("✅ Submit")
+                        cancel_btn = st.form_submit_button("❌ Cancel")
+
+                    if submit_btn:
+                        if name and email and phone and (comment or document):
+                            updated_customer = {
+                                "name": name,
+                                "email": email,
+                                "phone_number": phone,
+                                "whatsapp_number": whatsapp,
+                                "address": address,
+                                "is_delete": False
+                            }
+
+                            docfile = document
+                            order_id = order.get("id") if order else None
+                            update_customer_and_order(customer_id, order_id, updated_customer, comment, docfile)
+                        else:
+                            st.error("❌ Please fill all required fields and add a comment or document.")
+
+                    if cancel_btn:
+                        st.session_state.show_form = False
+                        st.session_state.customer_to_edit = None  # Clear customer data from session state
+                        st.rerun()
 
 else:
     st.warning("🚫 Please log in to access this page.")
-    st.switch_page("../auth_pages/login.py")
+    st.switch_page("auth_pages/login.py")

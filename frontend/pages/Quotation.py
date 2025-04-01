@@ -23,9 +23,11 @@ if st.session_state.login:
 
             if data:
                 df = pd.DataFrame(data)
-                df = df.drop("id", axis=1)
-                df = df.drop("order_id", axis=1)
-                st.dataframe(df, use_container_width=True)
+                # df = df.drop("id", axis=1)
+                # df = df.style.hide(axis="index")
+                # df = df.drop("order_id", axis=1)
+                # st.dataframe(df.style.hide(axis="index"))
+                st.dataframe(df.set_index(df.columns[0]))
             else:
                 st.warning("⚠️ No customer requests found")
         else:
@@ -33,7 +35,6 @@ if st.session_state.login:
 
     except Exception as e:
         st.error(f"⚠️ Error: {e}")
-
 
 else:
     st.text("⚠️ Please login first.")

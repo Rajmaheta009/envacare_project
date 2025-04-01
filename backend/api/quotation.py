@@ -1,17 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import SessionLocal
+from database import get_db
 from modal.quotation import Quotation
 from schema.quotation import QuotationCreate
 
 router = APIRouter()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @router.post("/", response_model=QuotationCreate)
 def create_quotation(quotation: QuotationCreate, db: Session = Depends(get_db)):

@@ -5,7 +5,7 @@ from database import Base
 
 
 class Order(Base):
-    __tablename__ = "order"
+    __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True)
     customer_id = Column(Integer, ForeignKey("customer_info.id"), nullable=False)
@@ -15,5 +15,5 @@ class Order(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 def get_next_id(db: Session):
-    result = db.execute(text("SELECT nextval(pg_get_serial_sequence('order', 'id'))"))
+    result = db.execute(text("SELECT nextval(pg_get_serial_sequence('orders', 'id'))"))
     return result.scalar()

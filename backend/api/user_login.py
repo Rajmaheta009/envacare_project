@@ -20,6 +20,5 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
         "id": db_user.id,
         "username": db_user.name,
         "email": db_user.email,
-        "role": db_user.role,
-        "log_in":True
+        "role": db_user.role
     }
