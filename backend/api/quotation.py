@@ -17,3 +17,4 @@ def create_quotation(quotation: QuotationCreate, db: Session = Depends(get_db)):
 @router.get("/")
 def get_quotations(db: Session = Depends(get_db)):
     return db.query(Quotation).all()
+

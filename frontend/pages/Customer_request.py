@@ -115,8 +115,11 @@ def update_customer_and_order(customer_id, order_id, data, comment, docfile):
                 "order_req_comment": comment,
                 "status": "Quotation Check"
             }
-            files = {'docfile': docfile}
-            order_response = requests.put(f"{ORDER_API}{order_id}", data=order_data, files=files)
+            if st.session_state.doc_check != docfile:
+                files = {'docfile': docfile}
+                order_response = requests.put(f"{ORDER_API}{order_id}", data=order_data, files=files)
+            else:
+                order_response = requests.put(f"{ORDER_API}{order_id}", data=order_data)
 
             if order_response.status_code == 200:
                 st.success("✅ Customer and Order updated successfully!")
@@ -124,12 +127,20 @@ def update_customer_and_order(customer_id, order_id, data, comment, docfile):
                 st.rerun()
             else:
                 st.error(f"❌ Failed to update order. Status: {order_response.status_code}")
-                st.write(order_data)
-                st.write(files)
 
     except Exception as e:
         st.error(f"⚠️ Error: {e}")
 
+def delete_customer_with_order(c_id,o_id):
+    delete_c=requests.delete(f"{CUSTOMER_API}{c_id}")
+    if delete_c.status_code == 204:
+        delete_o=requests.delete(f"{ORDER_API}{o_id}")
+        if delete_o.status_code == 200:
+            st.success("Delete Successfully")
+        else:
+            st.error(f"❌ Failed to Order delete.")
+    else:
+        st.error(f"❌ Failed to Customer Request delete.")
 
 # ✅ Main App Logic
 if session_state.login:
@@ -182,6 +193,8 @@ if session_state.login:
     st.markdown("### 📊 Submitted Customer Requests")
 
     customers = fetch_customers_with_orders()
+    if not customers:
+        st.warning("⚠️ No customer requests found")
 
     if customers:
         for customer in customers:
@@ -194,14 +207,27 @@ if session_state.login:
                 st.write(f"**Comment:** {customer['order_req_comment']}")
                 st.write(f"**Document:** {customer['order_req_doc']}")
 
+                col1 , col2 = st.columns([1,1])
                 # Edit button for each customer
-                if st.button(f"Edit {customer['name']}", key=f"edit_{customer_id}"):
+                if col1.button(f"Edit => {customer['name']}", key=f"edit_{customer_id}"):
                     # Fetch customer details based on customer_id
                     customer_details = fetch_customer_by_id(customer_id)
                     if customer_details:
                         # Store the selected customer details in session state for editing
                         st.session_state.show_form = True
                         st.session_state.customer_to_edit = customer_details  # Store customer data in session state
+
+
+                with col2.popover(f"Delete => {customer['name']}"):
+                    st.subheader("Are You Sure ?!")
+                    col1, col2 = st.columns([1, 2])
+                    if col1.button("YES"):
+                        order = fetch_order_by_customer_id(customer_id)
+                        order_id = order.get("id")
+                        delete_customer_with_order(customer_id,order_id)
+                    if col2.button("No"):
+                        st.write("Ok! Info Is Safe")
+
 
                 # Quotation button
                 if st.button(f"➕ Add Quotation for {customer['name']}", key=f"quote_{customer_id}"):
@@ -236,6 +262,8 @@ if session_state.login:
                         if order_doc:
                             st.write(f"Existing document: {order_doc}")
 
+                        st.session_state.doc_check= order_doc
+
                         submit_btn = st.form_submit_button("✅ Submit")
                         cancel_btn = st.form_submit_button("❌ Cancel")
 
@@ -251,8 +279,11 @@ if session_state.login:
                             }
 
                             docfile = document
-                            order_id = order.get("id") if order else None
-                            update_customer_and_order(customer_id, order_id, updated_customer, comment, docfile)
+                            order_id = order.get("id")
+                            if docfile:
+                                update_customer_and_order(customer_id, order_id, updated_customer, comment, docfile)
+                            else:
+                                update_customer_and_order(customer_id, order_id, updated_customer, comment,order_doc)
                         else:
                             st.error("❌ Please fill all required fields and add a comment or document.")
 

@@ -7,6 +7,7 @@ nav_pages=[
     st.Page("pages/Sample.py", title= "Sample List"),
     st.Page("pages/Result.py", title= "Result Set"),
     st.Page("pages/log_out.py", title= "Log Out"),
+    st.Page("pages/parameter.py", title= "Parameter"),
     st.Page("pages/test.py", title= "TEST")
 ]
 

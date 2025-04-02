@@ -146,7 +146,6 @@ def restore_order(order_id: int, db: Session = Depends(get_db)):
 
     return {"message": "Order restored successfully"}
 
-
 # ✅ Update an order
 @router.put("/{order_id}", status_code=200)
 def update_order(
@@ -154,7 +153,7 @@ def update_order(
         customer_id: int = Form(...),
         order_req_comment: str = Form(...),
         status: str = Form(...),
-        docfile: Optional[UploadFile] = File(),
+        docfile: Optional[UploadFile] =File(None),
         db: Session = Depends(get_db)):
     """ Update an existing order """
     order = db.query(Order).filter(Order.id == order_id).first()
