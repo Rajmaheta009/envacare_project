@@ -10,7 +10,6 @@ class ParameterCreate(BaseModel):
 
 
 class ParameterUpdate(BaseModel):
-    parent_id : int
     name: str
     price: float
     min_range : float

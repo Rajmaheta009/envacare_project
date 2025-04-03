@@ -25,6 +25,7 @@ def create_parameter(data):
     response = requests.post(f"{PARAMETER_URL}/", json=data)
     if response.status_code in [200, 201]:
         st.success("Parameter added successfully!")
+        st.rerun()
     else:
         st.error(f"Failed to add parameter: {response.text}")
 
@@ -36,19 +37,20 @@ def fetch_parameters():
     response = requests.get(PARAMETER_URL)
     return response.json() if response.status_code == 200 else []
 
-def update_parent_parameter(inx, id):
+def update_parent_parameter(inx, id, message_placeholder):
     name = st.session_state.get(f"input_{inx}", "")
     data = {"name": name}
     response = requests.put(f"{PARENT_PARAMETER_URL}/{id}", json=data)
     if response.status_code == 200:
-        st.success("Parent parameter updated successfully!")
         st.session_state.edit_form = None
+        message_placeholder.success("Parent parameter updated successfully!")
+        st.rerun()
     else:
-        st.error(f"Failed to update parent parameter: {response.text}")
+        message_placeholder.error(f"Failed to update parent parameter: {response.text}")
 
-def update_parameter(inx, parameter_id):
+
+def update_parameter(inx, parameter_id, message_placeholder):
     data = {
-        "parent_id": st.session_state[f"input_p_id_{inx}"],
         "name": st.session_state[f"input_name_{inx}"],
         "price": st.session_state[f"input_price_{inx}"],
         "min_range": st.session_state[f"input_min_{inx}"],
@@ -57,20 +59,28 @@ def update_parameter(inx, parameter_id):
     }
     response = requests.put(f"{PARAMETER_URL}/{parameter_id}", json=data)
     if response.status_code == 200:
-        st.success("Parameter updated successfully!")
+        message_placeholder.success("Parameter updated successfully!")
         st.session_state.edit_param[inx] = False
+        st.rerun()
     else:
-        st.error(f"Failed to update parameter: {response.text}")
+        message_placeholder.error(f"Failed to update parameter: {response.text}")
 
-def delete_parent_parameter(p_id):
+
+def delete_parent_parameter(p_id, message_placeholder):
     response = requests.delete(f"{PARENT_PARAMETER_URL}/{p_id}")
     if response.status_code == 200:
-        st.success("Parent parameter deleted successfully!")
+        message_placeholder.success("Parent parameter deleted successfully!")
+        st.rerun()
+    else:
+        message_placeholder.error(f"Failed to delete parent parameter: {response.text}")
 
-def delete_parameter(p_id):
+def delete_parameter(p_id, message_placeholder):
     response = requests.delete(f"{PARAMETER_URL}/{p_id}")
     if response.status_code == 200:
-        st.success("Parameter deleted successfully!")
+        message_placeholder.success("Parameter deleted successfully!")
+        st.rerun()
+    else:
+        message_placeholder.error(f"Failed to delete parameter: {response.text}")
 
 # Fetch data once
 display_parent_parameters = fetch_parent_parameters()
@@ -87,15 +97,17 @@ with st.form("parent_parameter_form"):
 # Add Parameter Form
 with st.form("add_parameter_form"):
     st.markdown("### Add Parameter Data")
-    p_id = st.number_input("Parent id", min_value=1)
-    name = st.text_input("Parameter Name")
-    protocol = st.text_input("Protocol Name")
-    price = st.number_input("Price", min_value=0.0, step=0.1, format="%.2f")
-    min_value = st.number_input("Min Value", min_value=0)
-    max_value = st.number_input("Max Value", min_value=0)
-    submit_btn = st.form_submit_button("✅ Submit Parameter")
+
+    col1 , col2 = st.columns([1,1])
+
+    name = col1.text_input("Parameter Name")
+    protocol = col2.text_input("Protocol Name")
+    min_value = col1.number_input("Min Value", min_value=0)
+    max_value = col2.number_input("Max Value", min_value=0)
+    price = col1.number_input("Price", min_value=0.0, step=0.1, format="%.2f")
+    submit_btn = col1.form_submit_button("✅ Submit Parameter")
     if submit_btn and name:
-        create_parameter({"parent_id": p_id, "name": name, "price": price, "min_range": min_value, "max_range": max_value, "protocol": protocol})
+        create_parameter({"name": name, "price": price, "min_range": min_value, "max_range": max_value, "protocol": protocol})
         st.rerun()
 
 # Display Parent Parameters
@@ -104,16 +116,19 @@ for ind, row in enumerate(display_parent_parameters):
     with st.expander(f"Details of {row['name']}"):
         st.markdown(f"**Parent Parameter ID:** {row['id']}")
         st.markdown(f"**Parent Parameter Name:** {row['name']}")
+
         if st.button("Edit", key=f"edit_parent_{ind}"):
             st.session_state.edit_form = ind
-        if st.button("Delete", key=f"delete_parent_{ind}"):
-            delete_parent_parameter(row['id'])
+
+        message_placeholder = st.empty()  # Create a placeholder
+        st.button("Delete", key=f"delete_parent_{ind}",on_click=delete_parent_parameter,args=(row['id'], message_placeholder))
+
         if st.session_state.edit_form == ind:
             edit_name = st.text_input("Edit Parent Parameter Name", value=row['name'], key=f"input_{ind}")
-            if st.button("Update Parent"):
-                update_parent_parameter(ind, row['id'])
+            st.button("Update Parent",on_click=update_parent_parameter,args=(ind, row['id'], message_placeholder))
             if st.button("Cancel Edit"):
                 st.session_state.edit_form = None
+            message_placeholder = st.empty()  # Create a placeholder for messages
 
 # Display Parameters
 st.markdown("### Parameters")
@@ -125,19 +140,27 @@ for ind, param in enumerate(display_parameters):
         st.markdown(f"**Min Value:** {param.get('min_range', 'N/A')}")
         st.markdown(f"**Max Value:** {param.get('max_range', 'N/A')}")
         st.markdown(f"**Protocol:** {param.get('protocol', 'N/A')}")
-        if st.button("Edit", key=f"edit_param_{ind}"):
+
+        col5, col6, col7 = st.columns([2, 2, 3])
+        if col6.button("Edit", key=f"edit_param_{ind}"):
             st.session_state.edit_param[ind] = True
-        if st.button("Delete", key=f"delete_param_{ind}"):
-            delete_parameter(param['id'])
+
+        col7.button("Delete", key=f"delete_param_{ind}",on_click=delete_parameter,args=(param['id'], message_placeholder))
+
+        message_placeholder = st.empty()  # Create a placeholder
         if st.session_state.edit_param.get(ind, False):
             with st.form(f"edit_param_form_{ind}"):
-                edit_p_id = st.number_input("Edit Parent Id", value=param['parent_id'], key=f"input_p_id_{ind}")
-                edit_name = st.text_input("Edit Parameter Name", value=param['name'], key=f"input_name_{ind}")
-                edit_price = st.number_input("Edit Price", value=float(param['price']), key=f"input_price_{ind}")
-                edit_min = st.number_input("Edit Min Value", value=float(param['min_range']), key=f"input_min_{ind}")
-                edit_max = st.number_input("Edit Max Value", value=float(param['max_range']), key=f"input_max_{ind}")
-                edit_protocol = st.text_input("Edit Protocol Name", value=param['protocol'], key=f"input_protocol_{ind}")
-                update_btn = st.form_submit_button("Update Parameter", on_click=update_parameter, args=(ind, param['id']))
-                cancel_btn = st.form_submit_button("Cancel Edit")
+                col3, col4 = st.columns([1, 1])
+                edit_name = col3.text_input("Edit Parameter Name", value=param['name'], key=f"input_name_{ind}")
+                edit_protocol = col4.text_input("Edit Protocol Name", value=param['protocol'],key=f"input_protocol_{ind}")
+                edit_min = col3.number_input("Edit Min Value", value=float(param['min_range']), key=f"input_min_{ind}")
+                edit_max = col4.number_input("Edit Max Value", value=float(param['max_range']), key=f"input_max_{ind}")
+                edit_price = col3.number_input("Edit Price", value=float(param['price']), key=f"input_price_{ind}")
+
+                col5 ,col6, col7= st.columns([1.5,2,3])
+                update_btn = col6.form_submit_button("Update Parameter",
+                                                   on_click=update_parameter,
+                                                   args=(ind, param['id'], message_placeholder))
+                cancel_btn = col7.form_submit_button("Cancel Edit")
                 if cancel_btn:
                     st.session_state.edit_param[ind] = False

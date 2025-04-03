@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 from modal.parameter import Parameter
-from schema.parameter import ParameterCreate
+from schema.parameter import ParameterCreate,ParameterUpdate
+
 
 router = APIRouter()
 
@@ -21,7 +22,7 @@ def get_all_parameters(db: Session = Depends(get_db)):
              "min_range": p.min_range, "max_range": p.max_range,"protocol":p.protocol} for p in parameters]
 
 @router.put("/{parameter_id}", status_code=200)
-def update_parameter(parameter_id:int,parameter: ParameterCreate, db: Session = Depends(get_db)):
+def update_parameter(parameter_id:int,parameter: ParameterUpdate, db: Session = Depends(get_db)):
     # Retrieve the existing parameter record by its ID
     db_parameter = db.query(Parameter).filter(Parameter.id == parameter_id).first()
 
@@ -35,7 +36,7 @@ def update_parameter(parameter_id:int,parameter: ParameterCreate, db: Session = 
     else:
         return {"error": "Parameter not found"}
 
-@router.delete("/", status_code=200)
+@router.delete("/{p_id}", status_code=200)
 def delete_parameter(p_id:int,db:Session = Depends(get_db)):
     db_parameter = db.query(Parameter).filter(Parameter.id == p_id).first()
 
