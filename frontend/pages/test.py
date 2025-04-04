@@ -1,32 +1,55 @@
 import streamlit as st
-from pages.parameter import fetch_parent_parameters
+from pages.parameter import fetch_parameters
 
-parent_parameters = fetch_parent_parameters()
+# Fetch all parameters
+parameters = fetch_parameters()
 
-def data_fatch_edit_form(inx):
-    st.write(st.session_state[f"input_{inx}"])
-    parent_parameters[inx]['name'] = st.session_state[f"input_{inx}"]
+# Split parameters into parents (no price) and children (with price)
+parent_parameters = [p for p in parameters if p["price"] is None]
+child_parameters = [p for p in parameters if p["price"] is not None]
 
-def get_edit_name(name):
-    if name:
-        st.write(name)
+# Streamlit layout
+st.set_page_config(layout="wide")
+st.title("🧪 Test Quotation Designer")
+
+col1, col2 = st.columns([2, 1])
+
+# Build a lookup table by parent_id
+child_map = {}
+for p in parameters:
+    parent_id = p.get("parent_id")
+    if parent_id is not None:
+        child_map.setdefault(parent_id, []).append(p)
+
+selected_parameters = {}
+
+def render_parameters(parent_id):
+    children = child_map.get(parent_id, [])
+    for child in children:
+        if child["price"] is None:
+            st.markdown(f"**{child['name']}**")
+            render_parameters(child["id"])
+        else:
+            key = f"{child['id']}_{child['name']}"
+            if st.checkbox(f"{child['name']} ₹{child['price']}", key=key):
+                selected_parameters[child["name"]] = child["price"]
+            else:
+                selected_parameters.pop(child["name"], None)
 
 
+with col1:
+    st.subheader("📌 Select Parameters")
+    for parent in parent_parameters:
+        if parent["parent_id"] is None:
+            st.markdown(f"### {parent['name']}")
+            render_parameters(parent["id"])
 
-for ind,row in enumerate(parent_parameters):
-    with st.expander(f"**Details of {row['name']}**"):
-        st.markdown(f"**Parent Parameter id :- {row['id']}**")
-        st.markdown(f"**Parent Parameter name :- {row['name']}**")
-        col1, col2 = st.columns([2, 1])
-        edit_button = st.button("Edit", key=row['id'])
-        delete_button = st.button("Delete", key=f"del_{row['id']}")
+with col2:
+    st.subheader("🧾 Selected Parameters")
+    total = 0
+    for name, price in selected_parameters.items():
+        st.write(f"- {name}: ₹{price}")
+        total = total + price
 
-        # Action handling for Edit or Delete
-        if edit_button:
-            # st.session_state.edit_form = row['id']  # Set the form for this parameter
-            # Edit Form inside st.form
-            # with st.form(f"edit_parent_form_{row['id']}"):
-            p_edit_name = st.text_input("Edit Parent Parameter New Name",key=f"input_{ind}", value=row['name'],on_change=data_fatch_edit_form,args=(ind,))
-            # p_update_btn = st.button("Update Parent",on_click=update_parent_parameter,args=(row['id'], {"name":p_edit_name}))
-            p_update_btn = st.button("Update Parent",on_click=get_edit_name,args=(p_edit_name,))
-            p_cancel_btn = st.button("Cancel Edit")
+    st.markdown("---")
+    st.markdown(f"### 💰 Total Cost: ₹{total}")

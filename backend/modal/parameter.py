@@ -7,7 +7,7 @@ class Parameter(Base):
     __tablename__ = "parameters"
 
     id = Column(Integer, primary_key=True, index=True)
-    parent_id = Column(Integer, ForeignKey("parent_parameter.id"))
+    parent_id = Column(Integer)
     name = Column(String)
     price = Column(Integer)
     min_range = Column(Integer)
