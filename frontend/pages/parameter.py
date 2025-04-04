@@ -76,48 +76,48 @@ with st.form("add_parameter_form"):
         st.rerun()
 
 # Display Parameters
-st.markdown("### Parameters")
-for ind, param in enumerate(display_parameters):
-    with st.expander(f"Details of {param['name']}"):
-        st.markdown(f"**Id:** {param['id']}")
-        st.markdown(f"**Parent Id:** {param['parent_id']}")
-        st.markdown(f"**Price:** {param.get('price', 'N/A')}")
-        st.markdown(f"**Min Value:** {param.get('min_range', 'N/A')}")
-        st.markdown(f"**Max Value:** {param.get('max_range', 'N/A')}")
-        st.markdown(f"**Protocol:** {param.get('protocol', 'N/A')}")
-
-        col5, col6, col7 = st.columns([2, 2, 3])
-        if col6.button("Edit", key=f"edit_param_{ind}"):
-            st.session_state.edit_param[ind] = True
-
-        message_placeholder = st.empty()  # Create a placeholder
-
-        if col7.button("Delete", key=f"delete_param_{ind}"):
-            with st.form("delete?"):
-                col11,col12,col13 = st.columns([2,3,1])
-                col12.subheader("Are You Sure")
-                col2, col3 ,col4 = st.columns([2,4,4])
-                if col3.form_submit_button("YES",on_click=delete_parameter,args=(param['id'], message_placeholder)):
-                    st.warning("data is deleted")
-                if col4.form_submit_button("NO"):
-                    st.success("Data Is Not Deleted")
-
-
-        if st.session_state.edit_param.get(ind, False):
-            with st.form(f"edit_param_form_{ind}"):
-                col3, col4 = st.columns([1, 1])
-                edit_name = col3.text_input("Edit Parameter Name", value=param['name'], key=f"input_name_{ind}")
-                edit_protocol = col4.text_input("Edit Protocol Name", value=param['protocol'],key=f"input_protocol_{ind}")
-                edit_min = col3.number_input("Edit Min Value", value=(param['min_range']), key=f"input_min_{ind}")
-                edit_max = col4.number_input("Edit Max Value", value=(param['max_range']), key=f"input_max_{ind}")
-                edit_price = col3.text_input("Edit Price", value=(param['price']), key=f"input_price_{ind}")
-
-                col5 ,col6, col7= st.columns([1.5,2,3])
-                update_btn = col6.form_submit_button("Update Parameter",
-                                                   on_click=update_parameter,
-                                                   args=(ind, param['id'], message_placeholder))
-                if update_btn:
-                    st.rerun()
-                cancel_btn = col7.form_submit_button("Cancel Edit")
-                if cancel_btn:
-                    st.session_state.edit_param[ind] = False
+# st.markdown("### Parameters")
+# for ind, param in enumerate(display_parameters):
+#     with st.expander(f"Details of {param['name']}"):
+#         st.markdown(f"**Id:** {param['id']}")
+#         st.markdown(f"**Parent Id:** {param['parent_id']}")
+#         st.markdown(f"**Price:** {param.get('price', 'N/A')}")
+#         st.markdown(f"**Min Value:** {param.get('min_range', 'N/A')}")
+#         st.markdown(f"**Max Value:** {param.get('max_range', 'N/A')}")
+#         st.markdown(f"**Protocol:** {param.get('protocol', 'N/A')}")
+#
+#         col5, col6, col7 = st.columns([2, 2, 3])
+#         if col6.button("Edit", key=f"edit_param_{ind}"):
+#             st.session_state.edit_param[ind] = True
+#
+#         message_placeholder = st.empty()  # Create a placeholder
+#
+#         if col7.button("Delete", key=f"delete_param_{ind}"):
+#             with st.form("delete?"):
+#                 col11,col12,col13 = st.columns([2,3,1])
+#                 col12.subheader("Are You Sure")
+#                 col2, col3 ,col4 = st.columns([2,4,4])
+#                 if col3.form_submit_button("YES",on_click=delete_parameter,args=(param['id'], message_placeholder)):
+#                     st.warning("data is deleted")
+#                 if col4.form_submit_button("NO"):
+#                     st.success("Data Is Not Deleted")
+#
+#
+#         if st.session_state.edit_param.get(ind, False):
+#             with st.form(f"edit_param_form_{ind}"):
+#                 col3, col4 = st.columns([1, 1])
+#                 edit_name = col3.text_input("Edit Parameter Name", value=param['name'], key=f"input_name_{ind}")
+#                 edit_protocol = col4.text_input("Edit Protocol Name", value=param['protocol'],key=f"input_protocol_{ind}")
+#                 edit_min = col3.number_input("Edit Min Value", value=(param['min_range']), key=f"input_min_{ind}")
+#                 edit_max = col4.number_input("Edit Max Value", value=(param['max_range']), key=f"input_max_{ind}")
+#                 edit_price = col3.text_input("Edit Price", value=(param['price']), key=f"input_price_{ind}")
+#
+#                 col5 ,col6, col7= st.columns([1.5,2,3])
+#                 update_btn = col6.form_submit_button("Update Parameter",
+#                                                    on_click=update_parameter,
+#                                                    args=(ind, param['id'], message_placeholder))
+#                 if update_btn:
+#                     st.rerun()
+#                 cancel_btn = col7.form_submit_button("Cancel Edit")
+#                 if cancel_btn:
+#                     st.session_state.edit_param[ind] = False
