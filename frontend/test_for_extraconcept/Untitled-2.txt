@@ -1,40 +1,40 @@
 A. SAMPLING CHARGES
     1."Air Monitoring"
         “Sampling (upto each 8 hrs) for suspended particulate matter and gaseous pollutants”  =======3500
-        "Sampling (24 hrs) for suspended particulate matter and gaseous pollutants" =======100
-        "Sampling of Volatile Organic Compounds (VOCs)/ Benzene Toluene Xylene (BTX)" =======1000
-        "Sampling of Poly Aromatic Hydrocarbons (PAHs)" =======100
-        "Sampling (24 hrs using PUF HVS) of Ambient Air for Dioxin- Furan (PCDDs-PCDFs) congeners " =====10500
+        "Sampling (24 hrs) for suspended particulate matter and gaseous pollutants" =======10500
+        "Sampling of Volatile Organic Compounds (VOCs)/ Benzene Toluene Xylene (BTX)" =======3500
+        "Sampling of Poly Aromatic Hydrocarbons (PAHs)" =======440
+        "Sampling (24 hrs using PUF HVS) of Ambient Air for Dioxin- Furan (PCDDs-PCDFs) congeners " =====15000
 
     2."Source Emission Monitoring/Sampling charges"
-        "Sampling/measurement of Velocity, Flow rate, temperature and molecular weight of 	FlueGas (each specific location/each sample in duplicate for the mentioned parameter)"=======3500
-        "Sampling of SO2/NO2" =======4400
-        "Sampling of Volatile Organic Compounds (VOCs)/ Benzene Toluene Xylene (BTX)" =======1500
-        "Sampling of Poly Aromatic  Hydrocarbons (PAHs)" =======9600
-        "Sampling of emission from stationary source for DioxinFuran (PCDDs-PCDFs) congeners using Manual Sampling Kit"====3500
+        "Sampling/measurement of Velocity, Flow rate, temperature and molecular weight of 	FlueGas (each specific location/each sample in duplicate for the mentioned parameter)"=======9600
+        "Sampling of SO2/NO2" =======3500
+        "Sampling of Volatile Organic Compounds (VOCs)/ Benzene Toluene Xylene (BTX)" =======5300
+        "Sampling of Poly Aromatic  Hydrocarbons (PAHs)" =======6200
+        "Sampling of emission from stationary source for DioxinFuran (PCDDs-PCDFs) congeners using Manual Sampling Kit"====25000
 
     3.“Noise Monitoring”
-        "First Monitoring" =======5300
-        "Each Subsequent Monitoring within same premises" =======6200
-        "For 08 hours Continuous Monitoring or more" =======25000
+        "First Monitoring" =======7000
+        "Each Subsequent Monitoring within same premises" =======3500
+        "For 08 hours Continuous Monitoring or more" =======18000
 
     4.“Sampling charges for water & wastewater samples”
         “GRAB SAMPLING”
-            " Grab sampling/sample/place " =======700
-            "For every additional Grab sampling/same place" =======3500
+            " Grab sampling/sample/place " =======960
+            "For every additional Grab sampling/same place" =======440
         “COMPOSITE SAMPLING”
-            "Composite sampling/source/place upto 8 hrs. " =======18000
-            "Composite sampling/source/place upto 16 hrs. " =======960
-            "Composite sampling/source/place upto 24 hrs" =======440
-            "For every additional composite sampling/same place but different source upto 8 hrs." ======= 1800
-            "For every additional composite sampling/same place but different source upto 16hrs"  ======= 5300
-            "For every additional composite sampling/same place but different source upto 24hrs" ======= 960
-        "Flow Rate measurement/source – once " ======= 2000
-        "Flow Rate measurement/source – every additional " ======= 2900
+            "Composite sampling/source/place upto 8 hrs. " =======1800
+            "Composite sampling/source/place upto 16 hrs. " =======3500
+            "Composite sampling/source/place upto 24 hrs" =======5300
+            "For every additional composite sampling/same place but different source upto 8 hrs." ======= 960
+            "For every additional composite sampling/same place but different source upto 16hrs"  ======= 2000
+            "For every additional composite sampling/same place but different source upto 24hrs" ======= 2900
+        "Flow Rate measurement/source – once " ======= 700
+        "Flow Rate measurement/source – every additional " ======= 270
 
     5.“Sampling charges for Soil samples”
-        "Grab sampling/sample/place" ======= 700
-        "For additional Grab sampling/same place" ======= 270
+        "Grab sampling/sample/place" =======1050
+        "For additional Grab sampling/same place" ======= 530
 
      6.“Hazardous Waste Sample collection charges at the premises of Industry/Import site/Disposal site”
         "Integrated sample collect ion charges" =======1800
@@ -50,10 +50,10 @@ B. “ANALYSIS CHARGES”
         "Fluoride (particulate)" =======1050
         "Hydrogen Chloride" ======= 1050
         "Hydrogen Sulphide" ======= 1050
-        "Lead & Other metals (per metal)" ==== "As per water & waste water analysis at clause V"
+        "Lead & Other metals (per metal) As per water & waste water analysis at clause V" =======0
         "NO2" ======= 1050
         "Ozone" ======= 1800
-        "Poly Aromatic Hydrocarbons (PAHs)"============"As per water & waste water analysis at clause V"
+        "Poly Aromatic Hydrocarbons (PAHs) As per water & waste water analysis at clause V"============0
         "Suspended Particulate Matter (SPM) " =======1050
         "Particulate Matter (PM2.5)" =======1800
         "Respirable Suspended Particulate Matter (PM10) " ======= 1050
@@ -76,7 +76,7 @@ B. “ANALYSIS CHARGES”
         "Fluoride (Gaseous) " =======1050
         "Chlorine" =======1050
         "Oxygen" =======1050
-        "Polycyclic Aromatic Hydrocarbons (Particulate)" ========== "As per water & waste water analysis At Clause V"
+        "Polycyclic Aromatic Hydrocarbons (Particulate) As per water & waste water analysis At Clause V" ==========0
         "Suspended Particulate Matter" ======= 1050
         "Sulphur Dioxide " =======1050
         "Benzene Toluene Xylene (BTX)" =======2700
@@ -87,9 +87,9 @@ B. “ANALYSIS CHARGES”
         "PM10, PM2.5 , SO2, NOx, SPM, CO along with Meteorological data viz. temperature, 	Humidity, Wind speed, Wind direct         - per hour (minimum charges Rs.15,000/-) + 	Rs.50.00/km run of the van for 24 hours monitoring" ======= 6200
 
     4.“Auto Exhaust Monitoring - One time checking of vehicular exhaust”
-        "Carbon Monoxide %" =======  "As per rate notified by Transport Department"
-        "Hydrocarbon, PPM  =======  "As per rate notified by Transport Department"
-        "Smoke Density, HSU =======  "As per rate notified by Transport Department"
+        "Carbon Monoxide % As per rate notified by Transport Department" =========0
+        "Hydrocarbon, PPM    As per rate notified by Transport Department" =========0
+        "Smoke Density, HSU   As per rate notified by Transport Department" =========0
 
     5.“Analysis charges of Water & Wastewater samples”
         "PHYSICAL PARAMETERS"
@@ -144,7 +144,7 @@ B. “ANALYSIS CHARGES”
                 "Sulphide" =======350
                 "Total Kjeldahl Nitrogen (TKN)" =======350
                 "Urea Nitrogen " =======620
-                "Cations (Na+ , NH4 + , K+ , Ca+2& Mg+2) and Anions (F- , Br- , Cl- , NO3 - , NO2 - ,SO4 -2& PO4 -3 ) in surface & ground water sample using Ion Chromatograph (for 12 ions)"==========="2100.00 (for 12 ions)"
+                "Cations (Na+ , NH4 + , K+ , Ca+2& Mg+2) and Anions (F- , Br- , Cl- , NO3 - , NO2 - ,SO4 -2& PO4 -3 ) in surface & ground water sample using Ion Chromatograph (for 12 ions)"===========2100
 
             "Metals"
                 "Processing pre-treatment Charge per Sample" =======880
@@ -304,7 +304,7 @@ B. “ANALYSIS CHARGES”
         "Exchangeable Sodium Percentage (ESP) " =======960
         "Gypsum Requirement" =======620
         "H. Acid" =======700
-        "Heavy Metal  ======= "(As per water & waste water analysis At Clause V)"
+        "Heavy Metal (As per water & waste water analysis At Clause V)" ============0
         "Trace Metals using ED-XRF”
             “Aluminium, Antimony, Arsenic, Barium, Bromine, Cadmium, Calcium, Cesium,	 			Chlorine,Chromium, Cobalt, Copper, Gallium, Germanium, Gold, Iodine, Iron, 				Lanthanum, Lead,Magnesium, Manganese, Molybdenum, Nickel, Palladium, 					Phosphorous, Potassium, 	Rubidium, Rutherfordium, Selenium, Silicon, Silver, Sodium, 			Strontium, Sulphur, Tellurium, Tin, 	Titanium, Tungsten, Vanadium, Ytterbium and Zinc, 		per sample." =======7000
             “Magnesium" =======530
@@ -313,9 +313,9 @@ B. “ANALYSIS CHARGES”
             “Nitrite" =======530
             “Nitrogen available" =======620
             “Organic Carbon/Matter (chemical method)" =======620
-            “Polycyclic Aromatic Hydrocarbons (PAHs)  =========  "(As per water & waste water analysis at clause V)"
-            “Polychlorinated Biphenyls (PCBs)      ====== "(As per water & waste water analysis at clause V)"
-            “Pesticides     ====== "(As per water & waste water analysis at clause V)"
+            “Polycyclic Aromatic Hydrocarbons (PAHs) (As per water & waste water analysis at clause V)" ============0
+            “Polychlorinated Biphenyls (PCBs) (As per water & waste water analysis at clause V)" ==============0
+            “Pesticides (As per water & waste water analysis at clause V)" ============= 0
             “pH" =======175
             “Phosphorous (available)" =======700
             “Phosphate (ortho) " =======530
@@ -336,7 +336,7 @@ B. “ANALYSIS CHARGES”
 
     7.“Analysis charges for Hazardous Waste samples”
         "Preparation of Leachate (TCLP extract/Water Extract)" ======= 1750
-        "Preparation of LeDetermination of various parameters in  Leachateachate (TCLP 	extract/Water Extract)  ======= "(As per water & waste water analysis in respective at clause V)"
+        "Preparation of LeDetermination of various parameters in  Leachateachate (TCLP 	extract/Water Extract) (As per water & waste water analysis in respective at clause V)" ===========0
         "Flash point/Ignitibility"	 =======960
         "Reactivity " =======960
         "Corrosivity" =======960

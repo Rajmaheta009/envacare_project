@@ -32,8 +32,7 @@ def render_parameters(parent_id):
             render_parameters(child["id"])
         else:
             key = f"{child['id']}_{child['name']}"
-            select_parameter=st.checkbox(f"{child['name']} ₹{child['price']}", key=key)
-            if select_parameter:
+            if st.checkbox(f"{child['name']} ₹{child['price']}", key=key):
                 selected_parameters[child["name"]] = child["price"]
             else:
                 selected_parameters.pop(child["name"], None)
@@ -54,7 +53,7 @@ with col1:
     st.subheader("📌 Select Parameters")
     search_term = st.text_input("🔍 Filter by parameter name", "",).lower().strip()
     search_btn=st.button("Search")
-    with st.container(height=500):
+    with st.container(height=500,border=False):
         if search_term == "":
             for parent in parent_parameters:
                 if parent["parent_id"] is None:
