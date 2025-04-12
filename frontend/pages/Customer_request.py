@@ -1,12 +1,27 @@
 import streamlit as st
 import requests
 from streamlit import session_state
+from pages.test import render_parameters
+from pages.parameter import fetch_parameters
 
 # API URLs
 API_BASE_URL = "http://localhost:8000"
 CUSTOMER_API = f"{API_BASE_URL}/customer_request/"
 ORDER_API = f"{API_BASE_URL}/order/"
 QUOTATION_API = f"{API_BASE_URL}/quotations/"
+
+
+# Fetch all parameters
+parameters = fetch_parameters()
+# Split parent and child parameters
+parent_parameters = [p for p in parameters if p["price"] is None]
+
+# Create child mapping by parent_id
+child_map = {}
+for p in parameters:
+    parent_id = p.get("parent_id")
+    if parent_id is not None:
+        child_map.setdefault(parent_id, []).append(p)
 
 # Initialize session state variables
 if "show_form" not in st.session_state:
@@ -17,11 +32,11 @@ if "customer_to_edit" not in st.session_state:
     st.session_state.customer_to_edit = None
 
 # Sample Parameters with Costs
-parameters = {
-    "Header 1": {"Sub1": 100, "Sub2": 200, "Sub3": 150},
-    "Header 2": {"Sub4": 300, "Sub5": 250},
-    "Header 3": {"Sub6": 400, "Sub7": 350}
-}
+# parameters = {
+#     "Header 1": {"Sub1": 100, "Sub2": 200, "Sub3": 150},
+#     "Header 2": {"Sub4": 300, "Sub5": 250},
+#     "Header 3": {"Sub6": 400, "Sub7": 350}
+# }
 
 # ✅ Function to fetch customers with orders
 def fetch_customers_with_orders():
@@ -116,6 +131,32 @@ def delete_customer_with_order(c_id, o_id):
             st.error("❌ Failed to delete Order.")
     else:
         st.error("❌ Failed to delete Customer Request.")
+
+def render_parameters(parent_id):
+    children = child_map.get(parent_id, [])
+    for child in children:
+        if child["price"] is None:
+            st.markdown(f"**{child['name']}**")
+            render_parameters(child["id"])
+        else:
+            key = f"{child['id']}_{child['name']}"
+            if st.checkbox(f"{child['name']} ₹{child['price']}", key=key):
+                selected_parameters[child["name"]] = child["price"]
+            else:
+                selected_parameters.pop(child["name"], None)
+            # html(select_parameter, height=100, scrolling=True)
+
+# MODE 2: Filtered flat list view
+def render_filtered_parameters():
+    for p in parameters:
+        if p["price"] is not None and search_term in p["name"].lower():
+            key = f"{p['id']}_{p['name']}"
+            if st.checkbox(f"{p['name']} ₹{p['price']}", key=key):
+                selected_parameters[p["name"]] = p["price"]
+            else:
+                selected_parameters.pop(p["name"], None)
+
+
 
 # ✅ Main App Logic
 if session_state.login:
@@ -215,20 +256,39 @@ if session_state.login:
                         st.write(f"document: {customer['order_req_doc']}")
 
                     selected_parameters = {}
-                    with col2:
-                        st.subheader("Select Parameters")
-                        for header, params in parameters.items():
-                            st.markdown(f"**{header}**")
-                            for param, cost in params.items():
-                                if st.checkbox(f"{param} - ₹{cost}", key=f"{param}_{customer_id}"):
-                                    selected_parameters[param] = cost
+                    parameters = fetch_parameters()
+                    # Split parent and child parameters
+                    parent_parameters = [p for p in parameters if p["price"] is None]
+                    # Create child mapping by parent_id
+                    child_map = {}
+                    for p in parameters:
+                        parent_id = p.get("parent_id")
+                        if parent_id is not None:
+                            child_map.setdefault(parent_id, []).append(p)
 
+                    with col2:
+                        st.subheader("📌 Select Parameters")
+                        search_term = st.text_input("🔍 Filter by parameter name", "", ).lower().strip()
+                        search_btn = st.button("Search")
+                        with st.container(height=500, border=False):
+                            if search_term == "":
+                                for parent in parent_parameters:
+                                    if parent["parent_id"] is None:
+                                        st.markdown(f"### {parent['name']}")
+                                        render_parameters(parent["id"])
+                            else:
+                                render_filtered_parameters()
+
+                    # RIGHT COLUMN
                     with col3:
-                        st.subheader("Summary")
-                        total_cost = sum(selected_parameters.values())
-                        for param, cost in selected_parameters.items():
-                            st.text(f"{param}: ₹{cost}")
-                        st.markdown(f"### Total: ₹{total_cost}")
+                        st.subheader("🧾 Selected Parameters")
+                        total = 0
+                        for name, price in selected_parameters.items():
+                            st.write(f"- {name}: ₹{price}")
+                            total += int(price)
+
+                        st.markdown("---")
+                        st.markdown(f"### 💰 Total Cost: ₹{total}")
 
                         if st.button("📩 Send Quotation", key=f"send_{customer_id}"):
                             # You can call your backend quotation saving logic here

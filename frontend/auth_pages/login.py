@@ -11,7 +11,7 @@ LOGIN_URL = f"{BASE_URL}/"
 
 # Layout: Title and Logo
 col1, col2, col3 = st.columns([1.3, 1, 1])
-col1.image("static/logo.png", width=150)
+col1.image("frontend/static/logo.png", width=150)
 
 col4, col5 = st.columns([2, 3])
 col4.title("Login")

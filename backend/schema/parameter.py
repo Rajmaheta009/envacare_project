@@ -11,7 +11,7 @@ class ParameterCreate(BaseModel):
 
 class ParameterUpdate(BaseModel):
     name: str
-    price: float
-    min_range : float
-    max_range : float
+    price: float = 00.00
+    min_range : float = 00.00
+    max_range : float= 00.00
     protocol : str
