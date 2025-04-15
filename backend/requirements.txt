@@ -1,0 +1,11 @@
+datetime~=5.5
+sqlalchemy~=2.0.39
+pydantic~=2.10.6
+fastapi[standard]
+uvicorn~=0.34.0
+dotenv~=0.9.9
+python-dotenv~=1.1.0
+jose~=1.0.0
+passlib~=1.7.4
+requests~=2.32.3
+psycopg2

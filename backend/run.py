@@ -17,10 +17,10 @@ if __name__ == "__main__":
     log_level = os.getenv("LOG_LEVEL", "info").lower()
 
     # Debug print for log level
-    print("Log level:", log_level)
+    # print("Log level:", log_level)
 
     uvicorn.run(
-        "app:app",
+        "main:app",
         host=host,
         port=port,
         log_level=log_level,
